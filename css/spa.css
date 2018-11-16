@@ -1,0 +1,37 @@
+body {
+  font-family: Georgia;
+}
+
+button {
+  margin: 5px 0;
+  padding: 7px;
+  background: #14618865;
+  color: white;
+  border-radius: 5px;
+}
+
+button:hover {
+  box-shadow: 0 0 5px gray;
+}
+
+#spa .main-content {
+  margin: 25px auto;
+  display: flex;
+  padding: 10px;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+#spa .main-content:hover {
+  border-radius: 10%;
+}
+
+input {
+  width: 350px;
+  height: 46px;
+  padding: 2px 25px;
+  border: 2px solid gray;
+  border-radius: 23px;
+  font-size: 14px;
+}

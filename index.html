@@ -1,0 +1,29 @@
+</<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>My first SPA application in plain JS</title>
+
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
+    </script>
+    <script src="spa.js">
+
+    </script>
+    <script type="text/javascript">
+      $(function() {
+        spa.initModule( $('#spa'));
+      });
+    </script>
+    <link rel="stylesheet" href="css/spa.css">
+  </head>
+  <body>
+    <button type="button" name="change_color" id="btnChangeColor">Change background</button>
+    <button type="button" name="toggle_size" id="btnToggleSize">Toggle size</button>
+    <input type="text" name="change_text" value="Enter some text here" id="myInput">
+    <div id = "spa">
+      <div class="main-content">
+
+      </div>
+    </div>
+  </body>
+</html>
