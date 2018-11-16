@@ -17,7 +17,7 @@ var spa = (function(){
 
     col_idx = 0,
 
-    arrColors = ['red', 'blue', 'black', 'yellow'],
+    arrColors = ['red', 'blue', 'green', 'yellow', 'gray'],
 
     jqueryMap = {},
     stateMap = {
