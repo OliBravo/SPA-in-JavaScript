@@ -20,7 +20,7 @@ spa.chat = (function () {
     //---------------- ROZPOCZĘCIE SEKCJI ZMIENNYCH ZAKRESU MODUŁU --------------
     var
       configMap = {
-          main_html : '<div>Cześć Kuba :)</div>',
+        main_html : '<div>Cześć Kuba :)</div>',
         settable_map : { color_name: true },
         color_name   : 'blue'
       },

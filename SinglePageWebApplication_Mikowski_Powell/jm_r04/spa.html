@@ -1,11 +1,22 @@
 ﻿<!doctype html>
+<!--
+  spa.html
+  Dokument przeglądarki spa.
+-->
+
 <html>
 <head>
-  <title>Starter SPA</title>
+  <!-- Obsługa renderowania IE9+ dla najnowszych standardów -->
+  <meta http-equiv="Content-Type" content="text/html; 
+    charset=ISO-8859-1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>SPA, rozdział 4.</title>
 
-  <!-- Arkusze stylów. -->
-  <link rel="stylesheet" href="css/spa.css" type="text/css"/>
-  <link rel="stylesheet" href="css/spa.chat.css" type="text/css">
+  <!-- Zewnętrzne arkusze stylów. -->
+
+  <!-- Nasze arkusze stylów. -->
+  <link rel="stylesheet" href="css/spa.css"       type="text/css"/>
+  <link rel="stylesheet" href="css/spa.chat.css"  type="text/css"/>
   <link rel="stylesheet" href="css/spa.shell.css" type="text/css"/>
 
   <!-- Zewnętrzny kod JavaScript. -->
@@ -14,11 +25,10 @@
 
   <!-- Nasz kod JavaScript. -->
   <script src="js/spa.js"      ></script>
-  <script src="js/spa.util.js"></script>
+  <script src="js/spa.util.js" ></script>
   <script src="js/spa.model.js"></script>
   <script src="js/spa.shell.js"></script>
-  <script src="js/spa.chat.js"></script>
-  
+  <script src="js/spa.chat.js" ></script>
   <script>
     $(function () { spa.initModule( $('#spa') ); });
   </script>

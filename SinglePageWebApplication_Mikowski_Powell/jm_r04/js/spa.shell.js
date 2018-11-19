@@ -101,7 +101,7 @@ spa.shell = (function () {
         configMap.chat_extend_time,
         function () {
           jqueryMap.$chat.attr(
-            'tytuł', configMap.chat_extended_title
+            'title', configMap.chat_extended_title
           );
           stateMap.is_chat_retracted = false;
           if ( callback ) { callback( jqueryMap.$chat ); }
@@ -117,7 +117,7 @@ spa.shell = (function () {
       configMap.chat_retract_time,
       function () {
         jqueryMap.$chat.attr(
-         'tytuł', configMap.chat_retracted_title
+         'title', configMap.chat_retracted_title
         );
         stateMap.is_chat_retracted = true;
         if ( callback ) { callback( jqueryMap.$chat ); }
@@ -270,13 +270,18 @@ spa.shell = (function () {
     // Inicjowanie suwaka czatu i wiązanie procedury obsługi kliknięcia.
     stateMap.is_chat_retracted = true;
     jqueryMap.$chat
-      .attr( 'tytuł', configMap.chat_retracted_title )
+      .attr( 'title', configMap.chat_retracted_title )
       .click( onClickChat );
 
     // Skonfigurowanie wtyczki uriAnchor do stosowania schematu.
     $.uriAnchor.configModule({
       schema_map : configMap.anchor_schema_map
     });
+
+    // konfiguracja i inicjowanie modułów funkcji
+    spa.chat.configModule( {} );
+    spa.chat.initModule( jqueryMap.$chat );
+
 
     // Obsługa zdarzeń zmiany kotwicy URI.
     // Robi się to po tym, jak wszystkie moduły funkcji zostaną skonfigurowane
