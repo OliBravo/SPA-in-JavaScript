@@ -1,9 +1,6 @@
 /*
- * module_template.js
- * Szablon do modułów funkcji przeglądarki
- *
- * Michael S. Mikowski - mike.mikowski@gmail.com
- * Copyright (c) 2011-2012 Manning Publications Co.
+ * spa.model.js
+ * Moduł Modelu.
 */
 
 /*jslint         browser : true, continue : true,
@@ -15,6 +12,4 @@
 
 /*global $, spa */
 
-spa.model = (function(){
-    return {};
-})();
+spa.model = (function (){ return {}; }());

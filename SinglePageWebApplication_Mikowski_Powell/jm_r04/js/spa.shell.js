@@ -252,7 +252,7 @@ spa.shell = (function () {
   // Rozpoczęcie procedury obsługi zdarzeń /onClickChat/.
   onClickChat = function ( event ) {
     changeAnchorPart({
-      chat : ( stateMap.is_chat_retracted ? 'open' : 'closed' )
+      chat: ( stateMap.is_chat_retracted ? 'open' : 'closed' )
     });
     return false;
   };
@@ -278,10 +278,9 @@ spa.shell = (function () {
       schema_map : configMap.anchor_schema_map
     });
 
-    // konfiguracja i inicjowanie modułów funkcji
+    // Konfigurowanie i inicjowanie modułów funkcji.
     spa.chat.configModule( {} );
     spa.chat.initModule( jqueryMap.$chat );
-
 
     // Obsługa zdarzeń zmiany kotwicy URI.
     // Robi się to po tym, jak wszystkie moduły funkcji zostaną skonfigurowane
