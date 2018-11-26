@@ -16,7 +16,7 @@ spa.shell = (function () {
   var
     configMap = {
       anchor_schema_map : {
-        chat  : { open : true, closed : true }
+        chat  : { opened : true, closed : true }
       },
       main_html : String()
         + '<div class="spa-shell-head">'
@@ -29,25 +29,15 @@ spa.shell = (function () {
           + '<div class="spa-shell-main-content"></div>'
         + '</div>'
         + '<div class="spa-shell-foot"></div>'
-        + '<div class="spa-shell-chat"></div>'
-        + '<div class="spa-shell-modal"></div>',
-      chat_extend_time     : 1000,
-      chat_retract_time    : 300,
-      chat_extend_height   : 450,
-      chat_retract_height  : 15,
-      chat_extended_title  : 'Kliknij, aby ukryć',
-      chat_retracted_title : 'Kliknij, aby pokazać'
+        + '<div class="spa-shell-modal"></div>'
     },
-    stateMap  = {
-      $container        : null,
-      anchor_map        : {},
-      is_chat_retracted : true
-    },
+
+    stateMap  = { anchor_map : {} },
     jqueryMap = {},
 
-    copyAnchorMap,    setJqueryMap,   toggleChat,
+    copyAnchorMap,    setJqueryMap,
     changeAnchorPart, onHashchange,
-    onClickChat,      initModule;
+    setChatAnchor,    initModule;
   //----------------- ZAKOŃCZENIE SEKCJI ZMIENNYCH ZAKRESU MODUŁU ---------------
 
   //------------------- ROZPOCZĘCIE SEKCJI METOD NARZĘDZIOWYCH ------------------
@@ -61,82 +51,19 @@ spa.shell = (function () {
   // Rozpoczęcie metody DOM /setJqueryMap/.
   setJqueryMap = function () {
     var $container = stateMap.$container;
-
-    jqueryMap = {
-      $container : $container,
-      $chat      : $container.find( '.spa-shell-chat' )
-    };
+    jqueryMap = { $container : $container };
   };
   // Zakończenie metody DOM /setJqueryMap/.
-
-  // Rozpoczęcie metody DOM /toggleChat/.
-  // Cel: wysuwanie i chowanie suwaka czatu.
-  // Argumenty:
-  //   * do_extend — jeśli prawda (true), wysuwa suwak, jeśli fałsz (false), chowa;
-  //   * callback (wywołanie zwrotne) — opcjonalna funkcja do wykonywania na zakończenie animacji.
-  // Ustawienia:
-  //   * chat_extend_time, chat_retract_time
-  //   * chat_extend_height,   chat_retract_height
-  // Zwraca wartość logiczną (boolean):
-  //   * true — animacja suwaka aktywowana;
-  //   * false — animacja suwaka nieaktywowana.
-  // Stan: konfiguruje stateMap.is_chat_retracted:
-  //   * true — suwak jest zwinięty;
-  //   * false — suwak jest rozwinięty.
-  //
-  toggleChat = function ( do_extend, callback) {
-    var
-      px_chat_ht = jqueryMap.$chat.height(),
-      is_open    = px_chat_ht === configMap.chat_extend_height,
-      is_closed  = px_chat_ht === configMap.chat_retract_height,
-      is_sliding = ! is_open && ! is_closed;
-
-    // Unikanie sytuacji wyścigu.
-    if ( is_sliding ) { return false; }
-
-    // Rozpoczęcie rozwijania suwaka czatu.
-    if ( do_extend ) {
-      jqueryMap.$chat.animate(
-        { height : configMap.chat_extend_height },
-        configMap.chat_extend_time,
-        function () {
-          jqueryMap.$chat.attr(
-            'title', configMap.chat_extended_title
-          );
-          stateMap.is_chat_retracted = false;
-          if ( callback ) { callback( jqueryMap.$chat ); }
-        }
-      );
-      return true;
-    }
-    // Zakończenie rozwijania suwaka czatu.
-
-    // Rozpoczęcie zwijania suwaka czatu.
-    jqueryMap.$chat.animate(
-      { height : configMap.chat_retract_height },
-      configMap.chat_retract_time,
-      function () {
-        jqueryMap.$chat.attr(
-         'title', configMap.chat_retracted_title
-        );
-        stateMap.is_chat_retracted = true;
-        if ( callback ) { callback( jqueryMap.$chat ); }
-      }
-    );
-    return true;
-    // Zakończenie zwijania suwaka czatu.
-  };
-  // Zakończenie metody DOM /toggleChat/.
 
   // Rozpoczęcie metody DOM /changeAnchorPart/
   // Cel: zmiana części komponentu kotwicy URI.
   // Argumenty:
   //   * arg_map — mapa opisująca, którą część kotwicy URI chcemy zmienić.
   //
-  // Zwraca: wartość logiczną (boolean):
+  // Zwraca:
   //   * true — część kotwicy adresu URI została zaktualizowana;
   //   * false — część kotwicy adresu URI nie mogła zostać zaktualizowana.
-  // Akcja:
+  // Akcje:
   //   bieżąca reprezentacja kotwicy przechowana w stateMap.anchor_map;
   //   sposób kodowania przez wtyczkę uriAnchor został omówiony w kolejnym podpunkcie.
   // Ta metoda:
@@ -199,19 +126,19 @@ spa.shell = (function () {
   // Argumenty:
   //   * event — obiekt zdarzeń jQuery.
   // Ustawienia: brak.
-  // Zwraca: false.
-  // Akcja:
+  // Zwraca: false
+  // Akcje:
   //   * parsuje komponent kotwicy adresu URI;
   //   * porównuje zaproponowany stan aplikacji ze stanem bieżącym;
   //   * dostosowuje aplikację tylko wtedy, kiedy proponowany stan
-  //     różni się od istniejącego.
+  //     różni się od istniejącegoi jest dozwolony w schemacie kotwicy
   //
   onHashchange = function ( event ) {
     var
-      anchor_map_previous = copyAnchorMap(),
+      _s_chat_previous, _s_chat_proposed, s_chat_proposed,
       anchor_map_proposed,
-      _s_chat_previous, _s_chat_proposed,
-      s_chat_proposed;
+      is_ok = true,
+      anchor_map_previous = copyAnchorMap();
 
     // Próba parsowania kotwicy.
     try { anchor_map_proposed = $.uriAnchor.makeAnchorMap(); }
@@ -231,47 +158,80 @@ spa.shell = (function () {
     ) {
       s_chat_proposed = anchor_map_proposed.chat;
       switch ( s_chat_proposed ) {
-        case 'open'   :
-          toggleChat( true );
+        case 'opened' :
+          is_ok = spa.chat.setSliderPosition( 'opened' );
         break;
         case 'closed' :
-          toggleChat( false );
+          is_ok = spa.chat.setSliderPosition( 'closed' );
         break;
-        default  :
-          toggleChat( false );
+        default :
+          spa.chat.setSliderPosition( 'closed' );
           delete anchor_map_proposed.chat;
           $.uriAnchor.setAnchor( anchor_map_proposed, null, true );
       }
     }
     // Zakończenie dostosowywania komponentu czatu, jeśli został zmieniony.
 
+    // Rozpoczęcie przywracania kotwicy, jeśli zmiana suwaka została odrzucona.
+    if ( ! is_ok ){
+      if ( anchor_map_previous ){
+        $.uriAnchor.setAnchor( anchor_map_previous, null, true );
+        stateMap.anchor_map = anchor_map_previous;
+      }
+      else {
+        delete anchor_map_proposed.chat;
+        $.uriAnchor.setAnchor( anchor_map_proposed, null, true );
+      }
+    }
+    // Koniec przywracania kotwicy, jeśli zmiana suwaka została odrzucona.
+
     return false;
   };
   // Zakończenie procedury obsługi zdarzeń /onHashchange/.
-
-  // Rozpoczęcie procedury obsługi zdarzeń /onClickChat/.
-  onClickChat = function ( event ) {
-    changeAnchorPart({
-      chat: ( stateMap.is_chat_retracted ? 'open' : 'closed' )
-    });
-    return false;
-  };
-  // Zakończenie procedury obsługi zdarzeń /onClickChat/.
   //-------------------- ZAKOŃCZENIE SEKCJI PROCEDUR OBSŁUGI ZDARZEŃ --------------------
+
+  //---------------------- ROZPOCZĘCIE SEKCJI WYWOŁAŃ ZWROTNYCH ---------------------
+  // Rozpoczęcie metody wywołania zwrotnego /setChatAnchor/.
+  // Przykład: setChatAnchor( 'closed' );.
+  // Cel: zmiana komponentu chat kotwicy.
+  // Argumenty:
+  //   * position_type — może być 'closed' lub 'open'.
+  // Akcja:
+  //   jeśli to możliwe, zmienia parametr 'chat' kotwicy URI na żądaną wartość.
+  
+  // Zwraca:
+  //   * true — żądana część kotwicy została zaktualizowana;
+  //   * false — żądana część kotwicy nie została zaktualizowana.
+  // Rzuca: nic.
+  //
+  setChatAnchor = function ( position_type ){
+    return changeAnchorPart({ chat : position_type });
+  };
+  // Zakończenie metody wywołania zwrotnego /setChatAnchor/.
+  //----------------------- ZAKOŃCZENIE SEKCJI WYWOŁAŃ ZWROTNYCH ----------------------
 
   //------------------- ROZPOCZĘCIE SEKCJI METOD PUBLICZNYCH -------------------
   // Rozpoczęcie metody publicznej /initModule/.
+  // Przykład: spa.shell.initModule( $('#app_div_id') );
+  // Cel:
+  //   wskazuje Czatowi, aby zaoferował swoje możliwości użytkownikowi.
+  // Argumenty:
+  //   * $container (example: $('#app_div_id')).
+  //   Kolekcja jQuery, która powinna reprezentować pojedynczy kontener DOM. 
+  //
+  // Akcja:
+  //   wypełnia $container powłoką interfejsu użytkownika,
+  //   a następnie konfiguruje i inicjuje moduły funkcji.
+  //   Powłoka jest również odpowiedzialna za kwestie dotyczące całej przeglądarki,
+  //   takie jak zarządzanie kotwicą URI i plikami cookie.
+  // Zwraca: nic. 
+  // Rzuca: nic.
+  //
   initModule = function ( $container ) {
     // Ładowanie HTML i mapowanie kolekcji jQuery.
     stateMap.$container = $container;
     $container.html( configMap.main_html );
     setJqueryMap();
-
-    // Inicjowanie suwaka czatu i wiązanie procedury obsługi kliknięcia.
-    stateMap.is_chat_retracted = true;
-    jqueryMap.$chat
-      .attr( 'title', configMap.chat_retracted_title )
-      .click( onClickChat );
 
     // Skonfigurowanie wtyczki uriAnchor do stosowania schematu.
     $.uriAnchor.configModule({
@@ -279,8 +239,12 @@ spa.shell = (function () {
     });
 
     // Konfigurowanie i inicjowanie modułów funkcji.
-    spa.chat.configModule( {} );
-    spa.chat.initModule( jqueryMap.$chat );
+    spa.chat.configModule({
+      set_chat_anchor : setChatAnchor,
+      chat_model      : spa.model.chat,
+      people_model    : spa.model.people
+    });
+    spa.chat.initModule( jqueryMap.$container );
 
     // Obsługa zdarzeń zmiany kotwicy URI.
     // Robi się to po tym, jak wszystkie moduły funkcji zostaną skonfigurowane
