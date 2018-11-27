@@ -49,10 +49,12 @@ spa.chat = (function () {
 
       slider_open_time     : 250,
       slider_close_time    : 250,
-      slider_opened_em     : 16,
+      slider_opened_em     : 18,
       slider_closed_em     : 2,
       slider_opened_title  : 'Kliknij, aby zamknąć',
       slider_closed_title  : 'Kliknij, aby otworzyć',
+      slider_opened_min_em : 10,
+      window_height_min_em : 20,
 
       chat_model      : null,
       people_model    : null,
@@ -69,7 +71,8 @@ spa.chat = (function () {
     jqueryMap = {},
 
     setJqueryMap, getEmSize, setPxSizes, setSliderPosition,
-    onClickToggle, configModule, initModule
+    onClickToggle, configModule, initModule,
+    removeSlider, handleResize
     ;
   //----------------- ZAKOŃCZENIE SEKCJI ZMIENNYCH ZAKRESU MODUŁU ---------------
 
@@ -103,11 +106,17 @@ spa.chat = (function () {
 
   // Rozpoczęcie metody DOM /setPxSizes/.
   setPxSizes = function () {
-    var px_per_em, opened_height_em;
+    var px_per_em, window_height_em, opened_height_em;
 
     px_per_em = getEmSize( jqueryMap.$slider.get(0) );
+    window_height_em = Math.floor(
+      ( $(window).height() / px_per_em ) + 0.5
+    );
 
-    opened_height_em = configMap.slider_opened_em;
+    opened_height_em
+      = window_height_em > configMap.window_height_min_em
+      ? configMap.slider_opened_em
+      : configMap.slider_opened_min_em;
 
     stateMap.px_per_em        = px_per_em;
     stateMap.slider_closed_px = configMap.slider_closed_em * px_per_em;
@@ -265,11 +274,66 @@ spa.chat = (function () {
   };
   // Zakończenie metody publicznej /initModule/.
 
+  // Rozpoczęcie metody publicznej /removeSlider/.
+  // Cel:
+  //   * usunięcie elementu DOM chatSlider;
+  //   * przywrócenie stanu początkowego;
+  //   * usunięcie wskaźników do wywołań zwrotnych oraz innych danych.
+  // Argumenty: brak.
+  // Zwraca: true.
+  // Rzuca: nic.
+  //
+  removeSlider = function () {
+    // Wycofuje inicjowanie i stan. 
+    // Usuwa kontener DOM; usuwa także wiązania zdarzeń.
+    if ( jqueryMap.$slider ) {
+      jqueryMap.$slider.remove();
+      jqueryMap = {};
+    }
+    stateMap.$append_target = null;
+    stateMap.position_type  = 'closed';
+
+    // Wycofanie kluczowych konfiguracji.
+    configMap.chat_model      = null;
+    configMap.people_model    = null;
+    configMap.set_chat_anchor = null;
+
+    return true;
+  };
+  // Zakończenie metody publicznej /removeSlider/.
+
+  // Rozpoczęcie metody publicznej /handleResize /.
+  // Cel:
+  //   przy danym zdarzeniu zmiany rozmiaru okna
+  //   dostosowanie w razie potrzeby dostarczanej przez ten moduł prezentacji.
+  // Akcje:
+  //   jeśli wysokość lub szerokość okna spadnie poniżej
+  //   danej wartości granicznej, zmieniamy rozmiar suwaka czatu
+  //   dla zmniejszonego rozmiaru okna.
+  // Zwraca wartość boolean:
+  //   * false — nie uwzględniono zmiany rozmiaru;
+  //   * true — uwzględniono zmianę rozmiaru.
+  // Rzuca: nic.
+  //
+  handleResize = function () {
+    // Nic nie rób, jeśli nie mamy kontenera suwaka.
+    if ( ! jqueryMap.$slider ) { return false; }
+
+    setPxSizes();
+    if ( stateMap.position_type === 'opened' ){
+      jqueryMap.$slider.css({ height : stateMap.slider_opened_px });
+    }
+    return true;
+  };
+  // Zakończenie metody publicznej /handleResize/.
+
   // Zwracanie metod publicznych.
   return {
     setSliderPosition : setSliderPosition,
     configModule      : configModule,
-    initModule        : initModule
+    initModule        : initModule,
+    removeSlider      : removeSlider,
+    handleResize      : handleResize
   };
   //------------------- ZAKOŃCZENIE SEKCJI METOD PUBLICZNYCH ---------------------
 }());

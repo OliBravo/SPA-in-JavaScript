@@ -18,6 +18,7 @@ spa.shell = (function () {
       anchor_schema_map : {
         chat  : { opened : true, closed : true }
       },
+      resize_interval : 200,
       main_html : String()
         + '<div class="spa-shell-head">'
           + '<div class="spa-shell-head-logo"></div>'
@@ -31,12 +32,15 @@ spa.shell = (function () {
         + '<div class="spa-shell-foot"></div>'
         + '<div class="spa-shell-modal"></div>'
     },
-
-    stateMap  = { anchor_map : {} },
+    stateMap = {
+      $container  : undefined,
+      anchor_map  : {},
+      resize_idto : undefined
+    },
     jqueryMap = {},
 
     copyAnchorMap,    setJqueryMap,
-    changeAnchorPart, onHashchange,
+    changeAnchorPart, onHashchange, onResize,
     setChatAnchor,    initModule;
   //----------------- ZAKOŃCZENIE SEKCJI ZMIENNYCH ZAKRESU MODUŁU ---------------
 
@@ -188,6 +192,20 @@ spa.shell = (function () {
     return false;
   };
   // Zakończenie procedury obsługi zdarzeń /onHashchange/.
+
+  // Rozpoczęcie procedury obsługi zdarzeń /onResize/.
+  onResize = function (){
+    if ( stateMap.resize_idto ){ return true; }
+
+    spa.chat.handleResize();
+    stateMap.resize_idto = setTimeout(
+      function (){ stateMap.resize_idto = undefined; },
+      configMap.resize_interval
+    );
+
+    return true;
+  };
+  // Zakończenie procedury obsługi zdarzeń /onResize/.
   //-------------------- ZAKOŃCZENIE SEKCJI PROCEDUR OBSŁUGI ZDARZEŃ --------------------
 
   //---------------------- ROZPOCZĘCIE SEKCJI WYWOŁAŃ ZWROTNYCH ---------------------
@@ -223,7 +241,7 @@ spa.shell = (function () {
   //   wypełnia $container powłoką interfejsu użytkownika,
   //   a następnie konfiguruje i inicjuje moduły funkcji.
   //   Powłoka jest również odpowiedzialna za kwestie dotyczące całej przeglądarki,
-  //   takie jak zarządzanie kotwicą URI i plikami cookie.
+  //   takie jak zarządzanie kotwicą URI i plikami cookie
   // Zwraca: nic. 
   // Rzuca: nic.
   //
@@ -253,9 +271,9 @@ spa.shell = (function () {
     // jest uznana za załadowaną.
     //
     $(window)
+      .bind( 'resize',     onResize )
       .bind( 'hashchange', onHashchange )
       .trigger( 'hashchange' );
-
   };
   // Zakończenie metody publicznej /initModule/.
 
